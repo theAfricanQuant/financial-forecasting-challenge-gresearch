@@ -5,6 +5,7 @@ IMPORTANT:
 To run this model you need run before preprocessing/preprocessing.py
 """
 
+
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
@@ -56,22 +57,7 @@ for i in [1,2,3,4]:
     lgb_train = lgb.Dataset(X_train[cols], y_train)
     # lgb_eval = lgb.Dataset(X_test[cols], y_test, reference=lgb_train)
     # Params
-    if i == 1:
-        params = {
-            'task': 'train',
-            'boosting_type': 'gbdt',
-            'objective': 'regression',
-            'metric': {'l2', 'mse'},
-            'num_leaves': 127,
-            'learning_rate': 0.05,
-            'bagging_fraction': 0.9, # 1
-            'feature_fraction': 0.95, # 1
-            'bagging_freq': 5,
-            'max_depth': -1,
-            'min_data_in_leaf': 350, # default=20
-            'verbose': 0
-        }
-    elif i == 2:
+    if i in [1, 2]:
         params = {
             'task': 'train',
             'boosting_type': 'gbdt',
@@ -127,18 +113,14 @@ for i in [1,2,3,4]:
                         #valid_sets=lgb_eval,
                         #early_stopping_rounds=20)
 
-    # Predict
-    pred_list = []
-    for bst in bst_lst:
-        pred_list.append(bst.predict(X_test, num_iteration=bst.best_iteration))
+    pred_list = [
+        bst.predict(X_test, num_iteration=bst.best_iteration)
+        for bst in bst_lst
+    ]
     y_pred = np.array(pred_list).mean(0)
 
     # Concatenate predictions
-    if i == 1:
-        y_pred_final = y_pred
-    else:
-        y_pred_final = np.hstack((y_pred_final, y_pred))
-
+    y_pred_final = y_pred if i == 1 else np.hstack((y_pred_final, y_pred))
     if not SUBMISSION:
         rmse_accumulated += (sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count())
         print(sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count())

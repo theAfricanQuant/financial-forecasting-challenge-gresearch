@@ -5,6 +5,7 @@ IMPORTANT:
 To run this model you need run before preprocessing/preprocessing.py
 """
 
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -87,11 +88,7 @@ for idx in range(8):
     params_xgb['seed'] = 2429 + 513 * idx
     bst_lst.append(xgb.train(params_xgb, xgmat_train, num_boost_round=n_round))
 
-# Predict
-pred_list = []
-for bst in bst_lst:
-    pred_list.append(bst.predict(xgmat_test))
-
+pred_list = [bst.predict(xgmat_test) for bst in bst_lst]
 y_pred = np.array(pred_list).mean(0)
 
 # Results
@@ -103,4 +100,7 @@ if SUBMISSION:
 else:
     # metric
     rmse_accumulated += sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count()
-    print(str(sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count()))
+    print(
+        sklearn.metrics.mean_squared_error(y_test.values, y_pred)
+        * y_test.count()
+    )

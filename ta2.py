@@ -90,14 +90,14 @@ def trix(close, n=15, fillna=True):
     trix = trix*1000
     if fillna:
         trix = trix.fillna(0)
-    return pd.Series(trix, name='trix_'+str(n))
+    return pd.Series(trix, name=f'trix_{str(n)}')
 
 
 def dpo(close, n=20, fillna=True):
     dpo = close.shift(int(n/(2+1))) - close.rolling(n).mean()
     if fillna:
         dpo = dpo.fillna(0)
-    return pd.Series(dpo, name='dpo_'+str(n))
+    return pd.Series(dpo, name=f'dpo_{str(n)}')
 
 
 def daily_return(close, fillna=True):

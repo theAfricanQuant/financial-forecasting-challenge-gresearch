@@ -5,6 +5,7 @@ IMPORTANT:
 To run this model you need run before preprocessing/preprocessing.py
 """
 
+
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
@@ -92,10 +93,9 @@ for idx in range(8):
                     #valid_sets=lgb_eval,
                     #early_stopping_rounds=20)
 
-# Predict
-pred_list = []
-for bst in bst_lst:
-    pred_list.append(bst.predict(X_test, num_iteration=bst.best_iteration))
+pred_list = [
+    bst.predict(X_test, num_iteration=bst.best_iteration) for bst in bst_lst
+]
 y_pred = np.array(pred_list).mean(0)
 
 if SUBMISSION:
@@ -106,6 +106,9 @@ if SUBMISSION:
 else:
     # metric
     rmse_accumulated += sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count()
-    print(str(sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count()))
+    print(
+        sklearn.metrics.mean_squared_error(y_test.values, y_pred)
+        * y_test.count()
+    )
 
 #print("Total: "+str(rmse_accumulated/float(N_CV+1)) + "\n")

@@ -109,7 +109,7 @@ def on_balance_volume_mean(close, volume, n=10):
 
 
 def force_index(close, volume, n=2):
-    return pd.Series(close.diff(n) * volume.diff(n), name='fi_'+str(n))
+    return pd.Series(close.diff(n) * volume.diff(n), name=f'fi_{str(n)}')
 
 
 def volume_price_trend(close, volume):

@@ -5,6 +5,7 @@ IMPORTANT:
 To run this model you need run before preprocessing/preprocessing.py
 """
 
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -35,6 +36,8 @@ if SUBMISSION:
     df_test_general = pd.read_csv('../input/test_fe.csv', index_col=0)
     df_test_general = fillna_bystock(df_test_general)
     df_test_final = pd.read_csv('../input/test.csv', index_col=0)
+
+n_round = 300
 
 for i in [1,2,3,4]:
     print("\n \nAnalyze Market: %i \n" % i)
@@ -77,8 +80,6 @@ for i in [1,2,3,4]:
                   'eval_metric'      : 'rmse',
                   'silent'           : True
     }
-    n_round = 300
-
     # Cross-Validation
     """
     cv_result = xgb.cv(params_xgb,
@@ -96,19 +97,11 @@ for i in [1,2,3,4]:
         params_xgb['seed'] = 2429 + 513 * idx
         bst_lst.append(xgb.train(params_xgb, xgmat_train, num_boost_round=n_round))
 
-    # Predict
-    pred_list = []
-    for bst in bst_lst:
-        pred_list.append(bst.predict(xgmat_test))
-
+    pred_list = [bst.predict(xgmat_test) for bst in bst_lst]
     y_pred = np.array(pred_list).mean(0)
 
     # Concatenate predictions
-    if i == 1:
-        y_pred_final = y_pred
-    else:
-        y_pred_final = np.hstack((y_pred_final, y_pred))
-
+    y_pred_final = y_pred if i == 1 else np.hstack((y_pred_final, y_pred))
     if not SUBMISSION:
         rmse_accumulated += (sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count())
         print(sklearn.metrics.mean_squared_error(y_test.values, y_pred) * y_test.count())

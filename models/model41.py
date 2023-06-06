@@ -5,6 +5,7 @@ IMPORTANT:
 To run this model you need run before preprocessing/preprocessing.py
 """
 
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -35,18 +36,15 @@ if SUBMISSION:
     df_test = pd.read_csv('../input/test_fe.csv', index_col=0)
     df_test = fillna_bystock(df_test)
 
+excl = ['Weight', 'y', 'Date']
+cols = [c for c in df_train.columns if (c not in excl and c.lower()[:2] != 'y_')]
+
 # Split
 if SUBMISSION:
-    excl = ['Weight', 'y', 'Date']
-    cols = [c for c in df_train.columns if (c not in excl and c.lower()[:2] != 'y_')]
-
     X_train = df_train[cols]
     y_train = df_train.y
     X_test = df_test[cols]
 else:
-    excl = ['Weight', 'y', 'Date']
-    cols = [c for c in df_train.columns if (c not in excl and c.lower()[:2] != 'y_')]
-
     # X_train, X_test, y_train, y_test = train_test_split(df[cols], df.y, test_size=0.5, random_state=17)
     X_train, X_test, y_train, y_test = train_test_split_own(df_train[cols], df_train.y)
 
@@ -90,11 +88,7 @@ for idx in range(8):
     params_xgb['seed'] = 2429 + 513 * idx
     bst_lst.append(xgb.train(params_xgb, xgmat_train, num_boost_round=n_round))
 
-# Predict
-pred_list = []
-for bst in bst_lst:
-    pred_list.append(bst.predict(xgmat_test))
-
+pred_list = [bst.predict(xgmat_test) for bst in bst_lst]
 y_pred = np.array(pred_list).mean(0)
 
 # Results
